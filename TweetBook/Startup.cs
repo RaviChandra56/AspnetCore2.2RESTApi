@@ -56,7 +56,7 @@ namespace TweetBook
 
             var swaggerOptions = new Options.SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
-            //swashbuckle aspnetcore
+            //swashbuckle aspnetcore from 
             app.UseSwagger(option =>
             {
                 option.RouteTemplate = swaggerOptions.JsonRoute;

@@ -15,6 +15,8 @@
             public const string Create = Base + "/posts";
 
             public const string Update = Base + "/posts/{postId}";
+
+            public const string Delete = Base + "/posts/{postId}";
         }
     }
 }

@@ -20,11 +20,12 @@ namespace TweetBook.Services
             _userManger = userManger;
             _jwtSettings = jwtSettings;
         }
+
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
             var existingsuser = await _userManger.FindByEmailAsync(email);
 
-            if(existingsuser != null)
+            if (existingsuser != null)
             {
                 return new AuthenticationResult
                 {
@@ -48,11 +49,40 @@ namespace TweetBook.Services
                 };
             }
 
+            return GenerateAuthenticationResultForUser(newUser);
+        }
+
+        public async Task<AuthenticationResult> LoginAsync(string email, string password)
+        {
+            var user = await _userManger.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User does not exists" }
+                };
+            }
+
+            var userHasValidPassword = await _userManger.CheckPasswordAsync(user, password);
+            if (!userHasValidPassword)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User/Password combination is wrong" }
+                };
+            }
+
+            return GenerateAuthenticationResultForUser(user);
+        }
+
+        private AuthenticationResult GenerateAuthenticationResultForUser(IdentityUser newUser)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new []
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, newUser.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
